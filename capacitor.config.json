@@ -1,0 +1,15 @@
+{
+  "appId": "com.motheroflists.app",
+  "appName": "MotherOfLists",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "dark",
+      "backgroundColor": "#ffffff",
+      "overlaysWebView": true
+    }
+  }
+}
