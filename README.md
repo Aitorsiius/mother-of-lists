@@ -1,3 +1,9 @@
+<div align="center">
+  <img src="./assets/icon.png" width="400" alt="Logo de la App">
+  <h1>Mother Of Lists</h1>
+  <p><i>Sincronización real-time para hogares modernos.</i></p>
+</div>
+
 # 📝 Collaborative Lists App
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -10,6 +16,18 @@
 Este proyecto nació de una necesidad cotidiana: **mejorar la experiencia de mis padres con las listas de la compra.** Cansado de las interfaces saturadas y la publicidad invasiva de apps como *Listonic*, decidí crear una alternativa propia.
 
 Es mi primera incursión en el ecosistema de **Firebase**, diseñada con un objetivo claro: **Cero distracciones, cero publicidad y sincronización instantánea.** Lo que empezó como un regalo familiar terminó siendo una exploración profunda en arquitecturas *real-time* y persistencia nativa.
+
+---
+
+## 📱 Capturas de Pantalla
+
+| Vista Principal: Modo Claro | Vista Principal: Modo Oscuro | Vista Lista: Modo Claro | Vista Lista: Modo Oscuro |
+| :---: | :---: | :---: | :---: |
+| <img src="./screenshots/main_light.jpeg" width="240"> | <img src="./screenshots/main_dark.jpeg" width="240"> | <img src="./screenshots/list_light.jpeg" width="240"> | <img src="./screenshots/list_dark.jpeg" width="240"> |
+
+| Código: Modo Claro | Código: Modo Oscuro | Solicitudes: Modo Claro | Solicitudes: Modo Oscuro |
+| :---: | :---: | :---: | :---: |
+| <img src="./screenshots/code_light.jpeg" width="240"> | <img src="./screenshots/code_dark.jpeg" width="240"> | <img src="./screenshots/request_light.jpeg" width="240"> | <img src="./screenshots/request_dark.jpeg" width="240"> |
 
 ---
 
@@ -73,5 +91,12 @@ npm run dev
 * **Capa Nativa:** Capacitor.
 * **Backend:** Serverless con Firebase Cloud Services.
 * **Seguridad:** Identificación única por dispositivo mediante Auth Anónimo y persistencia local de preferencias.
+
+## ⚖️ Licencia
+
+Este proyecto está bajo la Licencia GNU GPL v3. Consulta el archivo `LICENSE` para más detalles.
+
+---
+*Nota: Queda prohibida la redistribución de la APK adjunta en este repositorio en plataformas de terceros sin el consentimiento del autor.*
 
 Desarrollado con ❤️ para que mis padres no vuelvan a ver un anuncio mientras deciden qué comprar.
