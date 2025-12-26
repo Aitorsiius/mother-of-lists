@@ -64,7 +64,7 @@ Si quieres explorar las tripas del proyecto o lanzarlo en tu navegador, el proce
 
 ### 1. Clonar e Instalar
 ```bash
-git clone [https://github.com/Aitorsiius/mother-of-lists](https://github.com/Aitorsiius/mother-of-lists)
+git clone https://github.com/Aitorsiius/mother-of-lists
 cd mother-of-lists
 npm install
 ```
