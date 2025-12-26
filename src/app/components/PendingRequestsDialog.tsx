@@ -14,6 +14,7 @@ interface PendingRequestsDialogProps {
   onOpenChange: (open: boolean) => void;
   pendingRequests: string[];
   listId: string;
+  onApproveRequest?: (userId: string) => Promise<void>;
   translations: ReturnType<typeof import("../../utils/translations").useTranslation>;
 }
 
@@ -22,6 +23,7 @@ export function PendingRequestsDialog({
   onOpenChange,
   pendingRequests,
   listId,
+  onApproveRequest,
   translations: t,
 }: PendingRequestsDialogProps) {
   const [requests, setRequests] = useState<User[]>([]);
@@ -56,6 +58,9 @@ export function PendingRequestsDialog({
     setProcessing(userId);
     try {
       await firestoreService.approvePendingRequest(listId, userId);
+      if (onApproveRequest) {
+        await onApproveRequest(userId);
+      }
     } catch (error) {
       console.error("Error aprobando solicitud:", error);
     } finally {

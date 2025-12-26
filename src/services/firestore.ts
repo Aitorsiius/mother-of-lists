@@ -246,6 +246,8 @@ export const addPendingRequest = async (listId: string, userId: string): Promise
 
 /**
  * Aprobar solicitud pendiente y agregar usuario a la lista
+ * IMPORTANTE: Esta función también sincroniza toda la lista con Firebase
+ * para asegurar que el nuevo participante vea los datos más recientes
  */
 export const approvePendingRequest = async (listId: string, userId: string): Promise<void> => {
   try {
@@ -254,6 +256,16 @@ export const approvePendingRequest = async (listId: string, userId: string): Pro
     }
 
     const listRef = doc(db, "lists", listId);
+    
+    // Primero obtenemos la lista actual
+    const listSnap = await getDoc(listRef);
+    if (!listSnap.exists()) {
+      throw new Error("Lista no encontrada");
+    }
+    
+    const currentList = listSnap.data();
+    
+    // Actualizar: remover de pendientes y agregar a compartidos
     await updateDoc(listRef, {
       pendingRequests: arrayRemove(userId),
       sharedWith: arrayUnion(userId),

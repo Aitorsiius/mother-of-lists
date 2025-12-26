@@ -17,6 +17,7 @@ import { generateListCode } from "../utils/sortItems";
 import { toast, Toaster } from "sonner";
 import * as firestoreService from "../services/firestore";
 import * as authService from "../services/auth";
+import * as localStorageService from "../services/localStorage";
 import { useTheme } from "../hooks/useTheme";
 import { useLanguage } from "../hooks/useLanguage";
 import { useTranslation } from "../utils/translations";
@@ -110,15 +111,37 @@ function App() {
       return;
     }
 
-    // Suscribirse a cambios en tiempo real de las listas del usuario
-    const unsubscribe = firestoreService.subscribeToUserLists(user.id, (updatedLists) => {
-      setLists(updatedLists);
+    // Cargar listas personales desde almacenamiento local
+    const loadData = async () => {
+      const personalLists = await localStorageService.loadPersonalListsLocally();
+      
+      // Suscribirse a cambios en tiempo real de las listas compartidas del usuario en Firebase
+      const unsubscribe = firestoreService.subscribeToUserLists(user.id, (firebaseLists) => {
+        // Filtrar solo listas compartidas de Firebase
+        const sharedLists = firebaseLists.filter(list => !localStorageService.isPersonalList(list));
+        
+        // Combinar listas personales locales con listas compartidas de Firebase
+        setLists([...personalLists, ...sharedLists]);
+        setIsLoading(false);
+      });
+
+      // Si no hay listas en Firebase, solo mostrar las locales
+      setLists(personalLists);
       setIsLoading(false);
+
+      return unsubscribe;
+    };
+
+    let unsubscribe: (() => void) | undefined;
+    loadData().then(unsub => {
+      unsubscribe = unsub;
     });
 
     // Cleanup: cancelar suscripción al desmontar
     return () => {
-      unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, [user]);
 
@@ -146,15 +169,16 @@ function App() {
     };
 
     try {
-      // Crear en Firestore si está configurado (el listener actualizará el estado)
+      // Crear en Firestore para obtener el código
       if (firestoreService.isConfigured()) {
         await firestoreService.createList(newList);
-        // No navegamos automáticamente a la lista
-      } else {
-        // Solo en modo offline actualizar el estado local
-        setLists([...lists, newList]);
-        // No navegamos automáticamente a la lista
       }
+      
+      // Guardar localmente como lista personal
+      await localStorageService.addPersonalListLocally(newList);
+      
+      // Actualizar estado local inmediatamente
+      setLists([...lists, newList]);
     } catch (error) {
       console.error("Error creating list:", error);
       toast.error(t.errorCreateList);
@@ -203,14 +227,23 @@ function App() {
 
   const handleUpdateList = async (updatedList: List) => {
     try {
-      // Actualizar en Firestore si está configurado (no actualizar estado local, el listener lo hará)
-      if (firestoreService.isConfigured()) {
-        await firestoreService.updateList(updatedList.id, updatedList);
-      } else {
-        // Solo en modo offline actualizar el estado local
+      const isPersonal = localStorageService.isPersonalList(updatedList);
+      
+      if (isPersonal) {
+        // Lista personal: solo actualizar localmente
+        await localStorageService.updatePersonalListLocally(updatedList);
         setLists(lists.map((list) => 
           list.id === updatedList.id ? updatedList : list
         ));
+      } else {
+        // Lista compartida: actualizar en Firebase
+        if (firestoreService.isConfigured()) {
+          await firestoreService.updateList(updatedList.id, updatedList);
+        } else {
+          setLists(lists.map((list) => 
+            list.id === updatedList.id ? updatedList : list
+          ));
+        }
       }
     } catch (error) {
       console.error("Error updating list:", error);
@@ -220,18 +253,60 @@ function App() {
 
   const handleDeleteList = async (listId: string) => {
     try {
-      // Eliminar en Firestore si está configurado (no actualizar estado local, el listener lo hará)
-      if (firestoreService.isConfigured()) {
-        await firestoreService.deleteList(listId);
-      } else {
-        // Solo en modo offline actualizar el estado local
+      const list = lists.find(l => l.id === listId);
+      if (!list) return;
+      
+      const isPersonal = localStorageService.isPersonalList(list);
+      
+      if (isPersonal) {
+        // Lista personal: eliminar tanto localmente como en Firebase
+        await localStorageService.deletePersonalListLocally(listId);
+        
+        if (firestoreService.isConfigured()) {
+          await firestoreService.deleteList(listId);
+        }
+        
         setLists(lists.filter((list) => list.id !== listId));
-        setSelectedListId(null);
+      } else {
+        // Lista compartida: eliminar en Firebase
+        if (firestoreService.isConfigured()) {
+          await firestoreService.deleteList(listId);
+        } else {
+          setLists(lists.filter((list) => list.id !== listId));
+        }
       }
+      
+      setSelectedListId(null);
       toast.success(t.listDeletedSuccess);
     } catch (error) {
       console.error("Error deleting list:", error);
       toast.error(t.errorDeleteList);
+    }
+  };
+
+  const handleApproveRequest = async (listId: string, userId: string) => {
+    try {
+      const list = lists.find(l => l.id === listId);
+      if (!list) return;
+      
+      const wasPersonal = localStorageService.isPersonalList(list);
+      
+      if (wasPersonal) {
+        // La lista era personal, ahora se vuelve compartida
+        // Sincronizar toda la lista con Firebase antes de aprobar
+        if (firestoreService.isConfigured()) {
+          // Actualizar toda la lista en Firebase con los datos locales más recientes
+          await firestoreService.updateList(listId, list);
+          
+          // Eliminar de almacenamiento local ya que ahora será compartida
+          await localStorageService.migratePersonalListToShared(listId);
+          
+          // Actualizar estado local - Firebase listener se encargará de mantener sincronizado
+          setLists(lists.map(l => l.id === listId ? { ...l, sharedWith: [...l.sharedWith, userId] } : l));
+        }
+      }
+    } catch (error) {
+      console.error("Error handling approve request:", error);
     }
   };
 
@@ -285,6 +360,7 @@ function App() {
           onBack={() => setSelectedListId(null)}
           onUpdateList={handleUpdateList}
           onDeleteList={handleDeleteList}
+          onApproveRequest={handleApproveRequest}
           translations={t}
         />
       ) : (

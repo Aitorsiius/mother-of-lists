@@ -16,6 +16,7 @@ interface ListViewProps {
   onBack: () => void;
   onUpdateList: (list: List) => void;
   onDeleteList: (listId: string) => void;
+  onApproveRequest?: (listId: string, userId: string) => Promise<void>;
   translations: ReturnType<typeof import("../../utils/translations").useTranslation>;
 }
 
@@ -25,6 +26,7 @@ export function ListView({
   onBack,
   onUpdateList,
   onDeleteList,
+  onApproveRequest,
   translations: t,
 }: ListViewProps) {
   const [showAddItem, setShowAddItem] = useState(false);
@@ -212,6 +214,7 @@ export function ListView({
         onOpenChange={setShowPendingRequests}
         pendingRequests={list.pendingRequests || []}
         listId={list.id}
+        onApproveRequest={onApproveRequest ? (userId) => onApproveRequest(list.id, userId) : undefined}
         translations={t}
       />
     </div>
