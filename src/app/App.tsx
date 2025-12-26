@@ -272,23 +272,19 @@ function App() {
 
   const handleUpdateList = async (updatedList: List) => {
     try {
-      // Solo actualizar en Firebase si la lista tiene participantes (es compartida)
-      // NO actualizar en Firebase si solo tiene pendingRequests sin sharedWith
-      const isShared = updatedList.sharedWith.length > 0;
-      
       // Actualizar estado local PRIMERO para que sea inmediato
       setLists(lists.map((list) => 
         list.id === updatedList.id ? updatedList : list
       ));
       
-      if (isShared) {
-        // Lista compartida: actualizar en Firebase
-        if (firestoreService.isConfigured()) {
-          await firestoreService.updateList(updatedList.id, updatedList);
-          // El listener actualizará el estado automáticamente
-        }
-      } else {
-        // Lista personal: guardar localmente (no afecta el estado, ya está actualizado arriba)
+      // Siempre actualizar en Firebase si está configurado
+      if (firestoreService.isConfigured()) {
+        await firestoreService.updateList(updatedList.id, updatedList);
+      }
+
+      // Si es lista personal, TAMBIÉN actualizar localmente
+      const isShared = updatedList.sharedWith.length > 0;
+      if (!isShared) {
         await localStorageService.updatePersonalListLocally(updatedList);
       }
     } catch (error) {
