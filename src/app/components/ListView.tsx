@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { App as CapacitorApp } from '@capacitor/app';
 import { List, ListItem } from "../../types";
 import { ListItemComponent } from "./ListItemComponent";
 import { AddItemDialog } from "./AddItemDialog";
@@ -50,6 +51,34 @@ export function ListView({
   const sortedItems = sortItems(list.items);
   const participantCount = 1 + list.sharedWith.length;
   const isOwner = list.ownerId === currentUserId;
+
+  // Manejar botón de atrás para cerrar diálogos
+  useEffect(() => {
+    const backButtonListener = CapacitorApp.addListener('backButton', () => {
+      // Cerrar diálogos en orden de prioridad
+      if (showEditName) {
+        setShowEditName(false);
+        setEditedListName(list.name);
+      } else if (showAddItem) {
+        setShowAddItem(false);
+      } else if (showDeleteConfirm) {
+        setShowDeleteConfirm(false);
+      } else if (showUncheckAllConfirm) {
+        setShowUncheckAllConfirm(false);
+      } else if (showParticipants) {
+        setShowParticipants(false);
+      } else if (showPendingRequests) {
+        setShowPendingRequests(false);
+      } else {
+        // Si no hay diálogos abiertos, volver a la vista principal
+        onBack();
+      }
+    });
+
+    return () => {
+      backButtonListener.remove();
+    };
+  }, [showEditName, showAddItem, showDeleteConfirm, showUncheckAllConfirm, showParticipants, showPendingRequests, list.name, onBack]);
 
   const handleToggleItem = (itemId: string) => {
     const updatedItems = list.items.map((item) =>

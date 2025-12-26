@@ -9,6 +9,7 @@
 
 import { useState, useEffect } from "react";
 import { SplashScreen as CapacitorSplashScreen } from '@capacitor/splash-screen';
+import { App as CapacitorApp } from '@capacitor/app';
 import { List, User } from "../types";
 import { MainView } from "./components/MainView";
 import { ListView } from "./components/ListView";
@@ -389,6 +390,24 @@ function App() {
   useEffect(() => {
     CapacitorSplashScreen.hide();
   }, []);
+
+  // Manejar el botón/gesto de atrás en dispositivos móviles
+  // ListView maneja completamente su propio botón de atrás (diálogos + navegación)
+  // Este listener solo se ejecuta en MainView
+  useEffect(() => {
+    const backButtonListener = CapacitorApp.addListener('backButton', () => {
+      // Solo manejar en MainView (cuando no hay lista seleccionada)
+      // ListView maneja su propio comportamiento de atrás
+      if (!selectedListId) {
+        // En MainView sin diálogos, la app podría cerrarse o no hacer nada
+        // Los diálogos de MainView son manejados por su propio listener
+      }
+    });
+
+    return () => {
+      backButtonListener.remove();
+    };
+  }, [selectedListId]);
 
   // Mostrar splash screen personalizada mientras carga
   if (isLoading || !user) {

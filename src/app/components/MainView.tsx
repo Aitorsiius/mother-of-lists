@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { App as CapacitorApp } from '@capacitor/app';
 import { List, User } from "../../types";
 import { AddListCodeDialog } from "./AddListCodeDialog";
 import { Button } from "./ui/button";
@@ -60,6 +61,26 @@ export function MainView({
       setShowAddCode(true);
     }
   }, [pendingJoinCode]);
+
+  // Manejar botón de atrás para cerrar diálogos
+  useEffect(() => {
+    const backButtonListener = CapacitorApp.addListener('backButton', () => {
+      // Cerrar diálogos en orden de prioridad
+      if (showEditUser) {
+        setShowEditUser(false);
+      } else if (showCreateList) {
+        setShowCreateList(false);
+      } else if (showAddCode) {
+        setShowAddCode(false);
+        if (onClearPendingCode) onClearPendingCode();
+      }
+      // Si no hay diálogos abiertos, el listener de App.tsx manejará la navegación
+    });
+
+    return () => {
+      backButtonListener.remove();
+    };
+  }, [showEditUser, showCreateList, showAddCode, onClearPendingCode]);
 
   const sortedLists = [...lists].sort((a, b) => {
     const dateA = a.updatedAt instanceof Date ? a.updatedAt : new Date(a.updatedAt);
