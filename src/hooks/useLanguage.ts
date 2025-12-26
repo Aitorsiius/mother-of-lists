@@ -26,7 +26,6 @@ export function useLanguage() {
         await Preferences.set({ key: LANGUAGE_KEY, value: detectedLang });
       }
     } catch (error) {
-      console.error("Error loading language:", error);
       // Fallback a localStorage
       const stored = localStorage.getItem(LANGUAGE_KEY);
       if (stored) {
@@ -47,7 +46,6 @@ export function useLanguage() {
     try {
       await Preferences.set({ key: LANGUAGE_KEY, value: newLanguage });
     } catch (error) {
-      console.error("Error saving language:", error);
       localStorage.setItem(LANGUAGE_KEY, newLanguage);
     }
   };

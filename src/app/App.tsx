@@ -68,7 +68,6 @@ function App() {
           setUser(newUser);
         }
       } catch (error) {
-        console.error("Error inicializando usuario:", error);
         toast.error(t.errorInitApp);
         // Fallback a usuario temporal
         setUser({
@@ -90,8 +89,6 @@ function App() {
 
     // Verificar si Firebase está configurado
     if (!firestoreService.isConfigured()) {
-      console.warn("Firebase no está configurado. Usando datos de ejemplo.");
-      
       // Datos de ejemplo para desarrollo
       const sampleList: List = {
         id: crypto.randomUUID(),
@@ -226,7 +223,6 @@ function App() {
       // Actualizar estado local inmediatamente
       setLists([...lists, newList]);
     } catch (error) {
-      console.error("Error creating list:", error);
       toast.error(t.errorCreateList);
     }
   };
@@ -266,7 +262,6 @@ function App() {
         toast.error(t.listCodeNotFound);
       }
     } catch (error) {
-      console.error("Error joining list:", error);
       toast.error(t.errorJoinList);
     }
   };
@@ -289,7 +284,6 @@ function App() {
         await localStorageService.updatePersonalListLocally(updatedList);
       }
     } catch (error) {
-      console.error("Error updating list:", error);
       toast.error(t.errorUpdateList);
     }
   };
@@ -327,7 +321,6 @@ function App() {
       setSelectedListId(null);
       toast.success(t.listDeletedSuccess);
     } catch (error) {
-      console.error("Error deleting list:", error);
       toast.error(t.errorDeleteList);
     }
   };
@@ -351,7 +344,7 @@ function App() {
       // No hacer actualización optimista, dejar que Firebase sea la fuente de verdad
       // El listener actualizará automáticamente cuando Firebase confirme el cambio
     } catch (error) {
-      console.error("Error handling approve request:", error);
+      // Error silenciado - el listener de Firebase manejará el estado
     }
   };
 
@@ -379,7 +372,6 @@ function App() {
       await firestoreService.saveUser(updatedUser);
       setUser(updatedUser);
     } catch (error) {
-      console.error("Error actualizando nombre:", error);
       toast.error(t.errorSetName);
     }
   };

@@ -19,7 +19,6 @@ export const savePersonalListsLocally = async (lists: List[]): Promise<void> => 
       value: JSON.stringify(listsData),
     });
   } catch (error) {
-    console.error("Error saving personal lists locally:", error);
     throw error;
   }
 };
@@ -42,7 +41,6 @@ export const loadPersonalListsLocally = async (): Promise<List[]> => {
       updatedAt: new Date(list.updatedAt),
     }));
   } catch (error) {
-    console.error("Error loading personal lists locally:", error);
     return [];
   }
 };
@@ -59,7 +57,6 @@ export const updatePersonalListLocally = async (updatedList: List): Promise<void
     
     await savePersonalListsLocally(updatedLists);
   } catch (error) {
-    console.error("Error updating personal list locally:", error);
     throw error;
   }
 };
@@ -73,7 +70,6 @@ export const addPersonalListLocally = async (newList: List): Promise<void> => {
     lists.push(newList);
     await savePersonalListsLocally(lists);
   } catch (error) {
-    console.error("Error adding personal list locally:", error);
     throw error;
   }
 };
@@ -87,7 +83,6 @@ export const deletePersonalListLocally = async (listId: string): Promise<void> =
     const filteredLists = lists.filter(list => list.id !== listId);
     await savePersonalListsLocally(filteredLists);
   } catch (error) {
-    console.error("Error deleting personal list locally:", error);
     throw error;
   }
 };
@@ -107,7 +102,6 @@ export const getPersonalListLocally = async (listId: string): Promise<List | nul
     const lists = await loadPersonalListsLocally();
     return lists.find(list => list.id === listId) || null;
   } catch (error) {
-    console.error("Error getting personal list locally:", error);
     return null;
   }
 };
@@ -120,7 +114,6 @@ export const migratePersonalListToShared = async (listId: string): Promise<void>
   try {
     await deletePersonalListLocally(listId);
   } catch (error) {
-    console.error("Error migrating personal list to shared:", error);
     throw error;
   }
 };

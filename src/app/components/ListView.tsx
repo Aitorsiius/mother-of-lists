@@ -128,7 +128,7 @@ export function ListView({
         text: list.code,
       });
     } catch (error) {
-      console.error("Error sharing:", error);
+      // Error silenciado
     }
   };
 

@@ -49,7 +49,7 @@ export function ParticipantsDialog({
         
         setParticipants(users.filter((user): user is User => user !== null));
       } catch (error) {
-        console.error("Error cargando participantes:", error);
+        // Error silenciado
       } finally {
         setLoading(false);
       }
@@ -72,7 +72,7 @@ export function ParticipantsDialog({
         onRemoveParticipant(userId);
       }
     } catch (error) {
-      console.error("Error eliminando participante:", error);
+      // Error silenciado
     } finally {
       setRemoving(null);
     }

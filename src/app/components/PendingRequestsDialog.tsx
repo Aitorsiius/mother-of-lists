@@ -53,7 +53,7 @@ export function PendingRequestsDialog({
         
         setRequests(filteredUsers);
       } catch (error) {
-        console.error("Error cargando solicitudes:", error);
+        // Error silenciado
       } finally {
         setLoading(false);
       }
@@ -78,7 +78,7 @@ export function PendingRequestsDialog({
       
       setRequests(prev => prev.filter(req => req.id !== userId));
     } catch (error) {
-      console.error(`Error al ${action === 'approve' ? 'aprobar' : 'rechazar'}:`, error);
+      // Error silenciado
     } finally {
       setProcessing(null);
     }

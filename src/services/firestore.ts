@@ -61,7 +61,6 @@ export const getLists = async (userId: string): Promise<List[]> => {
     
     return uniqueLists;
   } catch (error) {
-    console.error("Error getting lists:", error);
     throw error;
   }
 };
@@ -82,7 +81,6 @@ export const createList = async (list: List): Promise<void> => {
       updatedAt: Timestamp.fromDate(list.updatedAt)
     });
   } catch (error) {
-    console.error("Error creating list:", error);
     throw error;
   }
 };
@@ -132,7 +130,6 @@ export const updateList = async (listId: string, updates: Partial<List>): Promis
 
     await updateDoc(listRef, updateData);
   } catch (error) {
-    console.error("Error updating list:", error);
     throw error;
   }
 };
@@ -149,7 +146,6 @@ export const deleteList = async (listId: string): Promise<void> => {
     const listRef = doc(db, "lists", listId);
     await deleteDoc(listRef);
   } catch (error) {
-    console.error("Error deleting list:", error);
     throw error;
   }
 };
@@ -179,7 +175,6 @@ export const findListByCode = async (code: string): Promise<List | null> => {
       updatedAt: docData.updatedAt?.toDate() || new Date()
     } as List;
   } catch (error) {
-    console.error("Error finding list by code:", error);
     throw error;
   }
 };
@@ -199,7 +194,6 @@ export const shareList = async (listId: string, userId: string): Promise<void> =
       updatedAt: Timestamp.fromDate(new Date())
     });
   } catch (error) {
-    console.error("Error sharing list:", error);
     throw error;
   }
 };
@@ -219,7 +213,6 @@ export const removeUserFromList = async (listId: string, userId: string): Promis
       updatedAt: Timestamp.fromDate(new Date())
     });
   } catch (error) {
-    console.error("Error removing user from list:", error);
     throw error;
   }
 };
@@ -239,7 +232,6 @@ export const addPendingRequest = async (listId: string, userId: string): Promise
       updatedAt: Timestamp.fromDate(new Date())
     });
   } catch (error) {
-    console.error("Error adding pending request:", error);
     throw error;
   }
 };
@@ -272,7 +264,6 @@ export const approvePendingRequest = async (listId: string, userId: string): Pro
       updatedAt: Timestamp.fromDate(new Date())
     });
   } catch (error) {
-    console.error("Error approving pending request:", error);
     throw error;
   }
 };
@@ -292,7 +283,6 @@ export const rejectPendingRequest = async (listId: string, userId: string): Prom
       updatedAt: Timestamp.fromDate(new Date())
     });
   } catch (error) {
-    console.error("Error rejecting pending request:", error);
     throw error;
   }
 };
@@ -321,7 +311,6 @@ export const getUser = async (userId: string): Promise<User | null> => {
     
     return null;
   } catch (error) {
-    console.error("Error getting user:", error);
     throw error;
   }
 };
@@ -343,7 +332,6 @@ export const saveUser = async (user: User): Promise<void> => {
       updatedAt: Timestamp.fromDate(new Date())
     });
   } catch (error) {
-    console.error("Error saving user:", error);
     throw error;
   }
 };
@@ -473,7 +461,6 @@ export const getNextListCode = async (): Promise<string> => {
     const nextCode = (maxCode + 1).toString().padStart(5, "0");
     return nextCode;
   } catch (error) {
-    console.error("Error generando siguiente código:", error);
     // En caso de error, generar un código aleatorio de 5 dígitos
     return Math.floor(10000 + Math.random() * 90000).toString();
   }

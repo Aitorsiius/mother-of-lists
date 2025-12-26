@@ -12,12 +12,11 @@ export const guardarNombreLocal = async (nombre: string): Promise<void> => {
       value: nombre,
     });
   } catch (error) {
-    console.error("Error guardando nombre:", error);
     // En web, usar localStorage como fallback
     try {
       localStorage.setItem('user_name', nombre);
     } catch (e) {
-      console.error("Error guardando en localStorage:", e);
+      // Error silenciado
     }
   }
 };
@@ -30,12 +29,10 @@ export const obtenerNombreLocal = async (): Promise<string | null> => {
     const { value } = await Preferences.get({ key: 'user_name' });
     return value;
   } catch (error) {
-    console.error("Error obteniendo nombre:", error);
     // En web, usar localStorage como fallback
     try {
       return localStorage.getItem('user_name');
     } catch (e) {
-      console.error("Error obteniendo de localStorage:", e);
       return null;
     }
   }
@@ -50,18 +47,15 @@ export const verificarUsuario = (): Promise<FirebaseUser> => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         // El usuario ya era conocido
-        console.log("Bienvenido de nuevo:", user.uid);
         unsubscribe();
         resolve(user);
       } else {
         // Es la primera vez, crear identidad anónima
         try {
           const credential = await signInAnonymously(auth);
-          console.log("Nueva identidad creada:", credential.user.uid);
           unsubscribe();
           resolve(credential.user);
         } catch (error) {
-          console.error("Error en autenticación:", error);
           unsubscribe();
           reject(error);
         }
