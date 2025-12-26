@@ -19,6 +19,12 @@ interface PendingRequestsDialogProps {
   translations: ReturnType<typeof import("../../utils/translations").useTranslation>;
 }
 
+// Definimos un tipo para el estado de procesamiento
+type ProcessingState = {
+  id: string;
+  action: 'approve' | 'reject';
+} | null;
+
 export function PendingRequestsDialog({
   open,
   onOpenChange,
@@ -29,21 +35,19 @@ export function PendingRequestsDialog({
 }: PendingRequestsDialogProps) {
   const [requests, setRequests] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState<string | null>(null);
+  
+  const [processing, setProcessing] = useState<ProcessingState>(null);
 
   useEffect(() => {
     const loadRequests = async () => {
-      // Si el diálogo está cerrado, no hacemos nada
       if (!open) return;
 
-      // Si no hay solicitudes, limpiamos y quitamos loading
       if (pendingRequests.length === 0) {
         setRequests([]);
         setLoading(false);
         return;
       }
       
-      // Esto evita que al borrar una se vea el texto de "Cargando..."
       if (requests.length === 0) setLoading(true);
 
       try {
@@ -53,21 +57,20 @@ export function PendingRequestsDialog({
         
         setRequests(filteredUsers);
       } catch (error) {
-        // Error silenciado
+        console.error(error);
       } finally {
         setLoading(false);
       }
     };
 
     loadRequests();
-    // Quitamos 'pendingRequests' de las dependencias si queremos un control total manual, 
-    // pero lo dejamos para que se sincronice si alguien más aprueba desde otro móvil.
   }, [open, pendingRequests.length]);
 
   const handleAction = async (userId: string, action: 'approve' | 'reject') => {
     if (!firestoreService.isConfigured() || processing) return;
     
-    setProcessing(userId);
+    setProcessing({ id: userId, action });
+    
     try {
       if (action === 'approve') {
         if (onApproveRequest) await onApproveRequest(userId);
@@ -78,7 +81,7 @@ export function PendingRequestsDialog({
       
       setRequests(prev => prev.filter(req => req.id !== userId));
     } catch (error) {
-      // Error silenciado
+      console.error(error);
     } finally {
       setProcessing(null);
     }
@@ -130,23 +133,31 @@ export function PendingRequestsDialog({
                       {user.name}
                     </span>
                     <div className="flex gap-2 shrink-0">
+                      
+                      {/* BOTÓN APROBAR */}
                       <button
                         onClick={() => handleAction(user.id, 'approve')}
                         disabled={processing !== null}
-                        className="p-2 bg-green-500 hover:bg-green-600 rounded-lg transition-all text-white disabled:opacity-50 shadow-sm active:scale-90"
+                        className="p-2 bg-green-500 hover:bg-green-600 rounded-lg transition-all text-white disabled:opacity-50 shadow-sm active:scale-90 flex items-center justify-center min-w-[32px]"
                       >
-                        {processing === user.id ? (
+                        {processing?.id === user.id && processing?.action === 'approve' ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           <Check className="w-4 h-4" />
                         )}
                       </button>
+
+                      {/* BOTÓN RECHAZAR */}
                       <button
                         onClick={() => handleAction(user.id, 'reject')}
                         disabled={processing !== null}
-                        className="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-all text-white disabled:opacity-50 shadow-sm active:scale-90"
+                        className="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-all text-white disabled:opacity-50 shadow-sm active:scale-90 flex items-center justify-center min-w-[32px]"
                       >
-                        <X className="w-4 h-4" />
+                        {processing?.id === user.id && processing?.action === 'reject' ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <X className="w-4 h-4" />
+                        )}
                       </button>
                     </div>
                   </motion.div>
