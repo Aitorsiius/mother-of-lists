@@ -13,7 +13,7 @@
 
 ## 🌟 El Origen: Una solución real para problemas reales
 
-Este proyecto nació de una necesidad cotidiana: **mejorar la experiencia de mis padres con las listas de la compra.** Cansado de las interfaces saturadas y la publicidad invasiva de apps como *Listonic*, decidí crear una alternativa propia.
+Este proyecto nació de una necesidad cotidiana: **mejorar la experiencia de mis padres con las listas de la compra.** Cansados de las interfaces saturadas y la publicidad invasiva de apps como *Listonic*, decidí crear una alternativa propia.
 
 Es mi primera incursión en el ecosistema de **Firebase**, diseñada con un objetivo claro: **Cero distracciones, cero publicidad y sincronización instantánea.** Lo que empezó como un regalo familiar terminó siendo una exploración profunda en arquitecturas *real-time* y persistencia nativa.
 
@@ -98,5 +98,7 @@ Este proyecto está bajo la Licencia GNU GPL v3. Consulta el archivo `LICENSE` p
 
 ---
 *Nota: Queda prohibida la redistribución de la APK adjunta en este repositorio en plataformas de terceros sin el consentimiento del autor.*
+
+*Nota: Al ser una APK descargada directamente, es posible que Android muestre un aviso de "Fuente desconocida". Esto es normal al no estar distribuida a través de la Play Store.*
 
 Desarrollado con ❤️ para que mis padres no vuelvan a ver un anuncio mientras deciden qué comprar.
