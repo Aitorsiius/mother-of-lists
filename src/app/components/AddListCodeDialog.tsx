@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ interface AddListCodeDialogProps {
   onOpenChange: (open: boolean) => void;
   onAdd: (code: string) => void;
   translations: ReturnType<typeof import("../../utils/translations").useTranslation>;
+  initialCode?: string;
 }
 
 export function AddListCodeDialog({
@@ -23,8 +24,15 @@ export function AddListCodeDialog({
   onOpenChange,
   onAdd,
   translations: t,
+  initialCode = "",
 }: AddListCodeDialogProps) {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode);
+
+  useEffect(() => {
+    if (open && initialCode) {
+      setCode(initialCode);
+    }
+  }, [open, initialCode]);
 
   const handleAdd = () => {
     if (code.trim().length === 5 && /^\d{5}$/.test(code)) {

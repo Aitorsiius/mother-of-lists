@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { List, User } from "../../types";
 import { AddListCodeDialog } from "./AddListCodeDialog";
@@ -29,6 +29,8 @@ interface MainViewProps {
   onToggleLanguage: () => void;
   language: Language;
   translations: ReturnType<typeof import("../../utils/translations").useTranslation>;
+  pendingJoinCode?: string | null;
+  onClearPendingCode?: () => void;
 }
 
 export function MainView({
@@ -43,12 +45,21 @@ export function MainView({
   onToggleLanguage,
   language,
   translations: t,
+  pendingJoinCode,
+  onClearPendingCode,
 }: MainViewProps) {
   const [showAddCode, setShowAddCode] = useState(false);
   const [showCreateList, setShowCreateList] = useState(false);
   const [showEditUser, setShowEditUser] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [editedUserName, setEditedUserName] = useState(user.name);
+
+  // Abrir diálogo si hay código pendiente
+  useEffect(() => {
+    if (pendingJoinCode) {
+      setShowAddCode(true);
+    }
+  }, [pendingJoinCode]);
 
   const sortedLists = [...lists].sort((a, b) => {
     const dateA = a.updatedAt instanceof Date ? a.updatedAt : new Date(a.updatedAt);
@@ -167,7 +178,7 @@ export function MainView({
                       onClick={() => onSelectList(list.id)}
                       className="w-full p-5 bg-white dark:bg-dark-surface rounded-xl border-2 border-gray-200 dark:border-dark-border hover:border-blue-400 dark:hover:border-blue-500 shadow-md hover:shadow-xl transition-colors text-left"
                     >
-                    <h3 className="mb-2 dark:text-white font-semibold text-lg">{list.name}</h3>
+                    <h3 className="mb-2 dark:text-white font-semibold text-lg truncate" style={{ maxWidth: '75%' }}>{list.name}</h3>
                     <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                       <span className="flex items-center gap-2">
                         <span className="font-semibold">{totalItems}</span>
@@ -211,7 +222,7 @@ export function MainView({
                       onClick={() => onSelectList(list.id)}
                       className="w-full p-5 bg-white dark:bg-dark-surface rounded-xl border-2 border-gray-200 dark:border-dark-border hover:border-blue-400 dark:hover:border-blue-500 shadow-md hover:shadow-xl transition-colors text-left"
                     >
-                    <h3 className="mb-2 dark:text-white font-semibold text-lg">{list.name}</h3>
+                    <h3 className="mb-2 dark:text-white font-semibold text-lg truncate" style={{ maxWidth: '75%' }}>{list.name}</h3>
                     <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                       <span className="flex items-center gap-2">
                         <span className="font-semibold">{totalItems}</span>
@@ -270,9 +281,15 @@ export function MainView({
       {/* Dialogs */}
       <AddListCodeDialog
         open={showAddCode}
-        onOpenChange={setShowAddCode}
+        onOpenChange={(open) => {
+          setShowAddCode(open);
+          if (!open && onClearPendingCode) {
+            onClearPendingCode();
+          }
+        }}
         onAdd={onJoinList}
         translations={t}
+        initialCode={pendingJoinCode || ""}
       />
 
       <Dialog open={showCreateList} onOpenChange={setShowCreateList}>

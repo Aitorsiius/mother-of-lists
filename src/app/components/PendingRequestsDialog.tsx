@@ -118,7 +118,12 @@ export function PendingRequestsDialog({
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 25,
+                      mass: 0.5
+                    }}
                     className="p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl flex items-center justify-between shadow-sm"
                   >
                     <span className="font-medium dark:text-white truncate mr-2">

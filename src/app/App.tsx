@@ -32,6 +32,7 @@ function App() {
   // Vista actual
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingJoinCode, setPendingJoinCode] = useState<string | null>(null);
   
   // Tema e idioma
   const { theme, toggleTheme } = useTheme();
@@ -404,6 +405,8 @@ function App() {
         <ListView
           list={selectedList}
           currentUserId={user.id}
+          pendingJoinCode={pendingJoinCode}
+          onClearPendingCode={() => setPendingJoinCode(null)}
           onBack={() => setSelectedListId(null)}
           onUpdateList={handleUpdateList}
           onDeleteList={handleDeleteList}

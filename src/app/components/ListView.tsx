@@ -7,8 +7,18 @@ import { ConfirmUncheckDialog } from "./ConfirmUncheckDialog";
 import { ParticipantsDialog } from "./ParticipantsDialog";
 import { PendingRequestsDialog } from "./PendingRequestsDialog";
 import { Button } from "./ui/button";
-import { ArrowLeft, Trash2, Plus, Users, CheckCheck, UserPlus } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Users, CheckCheck, UserPlus, Share2, Edit2 } from "lucide-react";
 import { sortItems } from "../../utils/sortItems";
+import { Share } from '@capacitor/share';
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./ui/dialog";
+import { Input } from "./ui/input";
 
 interface ListViewProps {
   list: List;
@@ -34,6 +44,8 @@ export function ListView({
   const [showParticipants, setShowParticipants] = useState(false);
   const [showUncheckAllConfirm, setShowUncheckAllConfirm] = useState(false);
   const [showPendingRequests, setShowPendingRequests] = useState(false);
+  const [showEditName, setShowEditName] = useState(false);
+  const [editedListName, setEditedListName] = useState(list.name);
 
   const sortedItems = sortItems(list.items);
   const participantCount = 1 + list.sharedWith.length;
@@ -74,6 +86,23 @@ export function ListView({
     onDeleteList(list.id);
   };
 
+  const handleUpdateListName = () => {
+    if (editedListName.trim() && editedListName.trim() !== list.name) {
+      onUpdateList({ ...list, name: editedListName.trim(), updatedAt: new Date() });
+    }
+    setShowEditName(false);
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        text: list.code,
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors">
       {/* Header */}
@@ -85,8 +114,16 @@ export function ListView({
           >
             <ArrowLeft className="w-6 h-6 dark:text-white" />
           </button>
-          <div className="flex-1 mx-4">
-            <h1 className="truncate dark:text-white">{list.name}</h1>
+          <div className="flex-1 mx-4 min-w-0">
+            <button
+              onClick={() => setShowEditName(true)}
+              className="w-full text-left px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-2 group overflow-hidden"
+            >
+              <span className="truncate dark:text-white font-semibold flex-1 min-w-0">{list.name}</span>
+              {isOwner && (
+                <Edit2 className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 flex-shrink-0" />
+              )}
+            </button>
             {participantCount > 1 && (
               <button
                 onClick={() => setShowParticipants(true)}
@@ -167,9 +204,18 @@ export function ListView({
 
       {/* Footer con código */}
       <div className="bg-white dark:bg-dark-surface border-t border-gray-200 dark:border-dark-border p-4 pb-6 fixed bottom-0 left-0 right-0 z-10" style={{ paddingBottom: 'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)))' }}>
-        <div className="max-w-md mx-auto text-center">
+        <div className="max-w-md mx-auto text-center relative">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t.listCode}</p>
-          <p className="text-3xl tracking-widest dark:text-white">{list.code}</p>
+          <div className="flex items-center justify-center">
+            <p className="text-3xl tracking-widest dark:text-white">{list.code}</p>
+            <button
+              onClick={handleShare}
+              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+              title={t.shareList}
+            >
+              <Share2 className="w-5 h-5" />
+            </button>
+          </div>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
             {t.enterListCodeDesc}
           </p>
@@ -217,6 +263,53 @@ export function ListView({
         onApproveRequest={onApproveRequest ? (userId) => onApproveRequest(list.id, userId) : undefined}
         translations={t}
       />
+
+      {/* Edit List Name Dialog */}
+      <Dialog open={showEditName} onOpenChange={setShowEditName}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{isOwner ? t.editListName : t.listName}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {isOwner ? (
+              <div>
+                <Input
+                  value={editedListName}
+                  onChange={(e) => setEditedListName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleUpdateListName();
+                    }
+                  }}
+                  placeholder={t.listNamePlaceholder}
+                  className="w-full"
+                  autoFocus
+                />
+              </div>
+            ) : (
+              <p className="text-lg dark:text-white">{list.name}</p>
+            )}
+          </div>
+          <DialogFooter>
+            {isOwner ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditedListName(list.name);
+                    setShowEditName(false);
+                  }}
+                >
+                  {t.cancel}
+                </Button>
+                <Button onClick={handleUpdateListName}>{t.save}</Button>
+              </>
+            ) : (
+              <Button onClick={() => setShowEditName(false)}>{t.close}</Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
