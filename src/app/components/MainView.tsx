@@ -147,20 +147,21 @@ export function MainView({
           <div className="mb-6">
             <h2 className="mb-3 text-gray-600 dark:text-gray-400 font-semibold">{t.myListsSection}</h2>
             <div className="space-y-3">
-              <AnimatePresence>
+              <AnimatePresence mode="popLayout">
                 {myLists.map((list) => {
                   const { totalItems, totalUsers } = getListStats(list);
                   return (
                     <motion.button
+                      layout
                       key={list.id}
-                      initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, x: -100 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ 
                         type: "spring", 
-                        stiffness: 200, 
-                        damping: 20,
-                        duration: 0.5
+                        stiffness: 300, 
+                        damping: 25,
+                        mass: 0.5
                       }}
                       whileHover={{ scale: 1.02 }}
                       onClick={() => onSelectList(list.id)}
@@ -190,20 +191,21 @@ export function MainView({
           <div className="mb-6">
             <h2 className="mb-3 text-gray-600 dark:text-gray-400 font-semibold">{t.sharedListsSection}</h2>
             <div className="space-y-3">
-              <AnimatePresence>
+              <AnimatePresence mode="popLayout">
                 {sharedLists.map((list) => {
                   const { totalItems, totalUsers } = getListStats(list);
                   return (
                     <motion.button
+                      layout
                       key={list.id}
-                      initial={{ opacity: 0, scale: 0.8, y: -20 }}
+                      initial={{ opacity: 0, scale: 0.9, y: 20 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, x: -100 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ 
                         type: "spring", 
-                        stiffness: 200, 
-                        damping: 20,
-                        duration: 0.5
+                        stiffness: 300, 
+                        damping: 25,
+                        mass: 0.5
                       }}
                       whileHover={{ scale: 1.02 }}
                       onClick={() => onSelectList(list.id)}
