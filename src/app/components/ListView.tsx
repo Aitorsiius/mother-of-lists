@@ -313,6 +313,7 @@ export function ListView({
                   placeholder={t.listNamePlaceholder}
                   className="w-full"
                   autoFocus
+                  maxLength={50}
                 />
               </div>
             ) : (

@@ -350,6 +350,7 @@ export function MainView({
                     handleCreateList();
                   }
                 }}
+                maxLength={50}
               />
             </div>
           </div>
