@@ -4,7 +4,8 @@ import { List, User } from "../../types";
 import { AddListCodeDialog } from "./AddListCodeDialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Plus, Key, Users, Moon, Sun, Languages } from "lucide-react";
+import { Plus, Key, Users, Moon, Sun, Languages, Heart } from "lucide-react";
+import { Browser } from "@capacitor/browser";
 import {
   Dialog,
   DialogContent,
@@ -79,13 +80,27 @@ export function MainView({
     return { totalItems, totalUsers };
   };
 
+  const handleDonation = async () => {
+    await Browser.open({ 
+      url: "https://www.paypal.com/donate/?hosted_button_id=UC2XH84REL3JA"
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors">
       {/* Header */}
       <div className="bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border p-4 sticky top-0 z-10" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="dark:text-white">{t.myLists}</h1>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleDonation}
+                className="p-2 bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shadow-sm"
+                title={language === "es" ? "Apoyar con una donación" : "Support with a donation"}
+              >
+                <Heart className="w-6 h-6 text-red-500 dark:text-red-400" />
+              </button>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={onToggleLanguage}
