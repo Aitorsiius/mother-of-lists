@@ -27,9 +27,6 @@ export const translations = {
     editListName: "Editar nombre de la lista",
     save: "Guardar",
     close: "Cerrar",
-    editListName: "Editar nombre de la lista",
-    save: "Guardar",
-    close: "Cerrar",
     
     // Dialogs
     createNewList: "Crear nueva lista",
@@ -124,9 +121,6 @@ export const translations = {
     back: "Back",
     addItem: "Add item",
     emptyList: "There are no items in this list yet",
-    editListName: "Edit list name",
-    save: "Save",
-    close: "Close",
     editListName: "Edit list name",
     save: "Save",
     close: "Close",
