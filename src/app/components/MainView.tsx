@@ -98,9 +98,9 @@ export function MainView({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-bg transition-colors">
+    <div className="h-screen bg-gray-50 dark:bg-dark-bg transition-colors flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border p-4 sticky top-0 z-10" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+      <div className="bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border p-4 flex-shrink-0" style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))' }}>
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -152,7 +152,7 @@ export function MainView({
       </div>
 
       {/* Lists */}
-      <div className="p-4 pb-32 max-w-md mx-auto w-full">
+      <div className="flex-1 overflow-y-auto p-4 pb-32 max-w-md mx-auto w-full">
         {/* Mis Listas */}
         {myLists.length > 0 && (
           <div className="mb-6">
