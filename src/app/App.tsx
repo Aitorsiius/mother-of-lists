@@ -405,7 +405,7 @@ function App() {
     });
 
     return () => {
-      backButtonListener.remove();
+      backButtonListener.then(listener => listener.remove());
     };
   }, [selectedListId]);
 

@@ -5,7 +5,7 @@ import { List, User } from "../../types";
 import { AddListCodeDialog } from "./AddListCodeDialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Plus, Key, Users, Moon, Sun, Languages, Heart } from "lucide-react";
+import { Plus, Key, Users, Moon, Sun, Languages, Heart, Settings } from "lucide-react";
 import { Browser } from "@capacitor/browser";
 import {
   Dialog,
@@ -52,6 +52,7 @@ export function MainView({
   const [showAddCode, setShowAddCode] = useState(false);
   const [showCreateList, setShowCreateList] = useState(false);
   const [showEditUser, setShowEditUser] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [editedUserName, setEditedUserName] = useState(user.name);
 
@@ -66,7 +67,9 @@ export function MainView({
   useEffect(() => {
     const backButtonListener = CapacitorApp.addListener('backButton', () => {
       // Cerrar diálogos en orden de prioridad
-      if (showEditUser) {
+      if (showSettings) {
+        setShowSettings(false);
+      } else if (showEditUser) {
         setShowEditUser(false);
       } else if (showCreateList) {
         setShowCreateList(false);
@@ -78,9 +81,9 @@ export function MainView({
     });
 
     return () => {
-      backButtonListener.remove();
+      backButtonListener.then(listener => listener.remove());
     };
-  }, [showEditUser, showCreateList, showAddCode, onClearPendingCode]);
+  }, [showSettings, showEditUser, showCreateList, showAddCode, onClearPendingCode]);
 
   const sortedLists = [...lists].sort((a, b) => {
     const dateA = a.updatedAt instanceof Date ? a.updatedAt : new Date(a.updatedAt);
@@ -118,6 +121,12 @@ export function MainView({
     });
   };
 
+  const handleOpenGitHub = async () => {
+    await Browser.open({ 
+      url: "https://github.com/Aitorsiius/mother-of-lists"
+    });
+  };
+
   return (
     <div className="h-screen bg-gray-50 dark:bg-dark-bg transition-colors flex flex-col overflow-hidden">
       {/* Header */}
@@ -125,6 +134,13 @@ export function MainView({
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowSettings(true)}
+                className="p-2 bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shadow-sm"
+                title={language === "es" ? "Ajustes" : "Settings"}
+              >
+                <Settings className="w-6 h-6 dark:text-white" />
+              </button>
               <button
                 onClick={handleDonation}
                 className="p-2 bg-white dark:bg-dark-surface border border-gray-200 dark:border-dark-border hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors shadow-sm"
@@ -378,6 +394,37 @@ export function MainView({
             </Button>
             <Button onClick={handleUpdateUserName} disabled={!editedUserName.trim()} className="bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 dark:border-blue-500 shadow-sm">
               {t.setName}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-sm dark:bg-dark-surface dark:border-dark-border">
+          <DialogHeader>
+            <DialogTitle className="dark:text-white">{language === "es" ? "Ajustes" : "Settings"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col items-center gap-4">
+              <Button 
+                onClick={handleOpenGitHub}
+                className="w-full bg-gray-800 hover:bg-gray-900 text-white border border-gray-700 shadow-sm"
+              >
+                {language === "es" ? "Ver en GitHub" : "View on GitHub"}
+              </Button>
+              <div className="text-center space-y-2">
+                <p className="text-sm font-medium dark:text-white">Aitor Gómez Ogueta</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">v1.0</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowSettings(false)}
+              className="w-full border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm"
+            >
+              {t.close}
             </Button>
           </DialogFooter>
         </DialogContent>

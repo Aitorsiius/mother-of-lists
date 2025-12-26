@@ -76,7 +76,7 @@ export function ListView({
     });
 
     return () => {
-      backButtonListener.remove();
+      backButtonListener.then(listener => listener.remove());
     };
   }, [showEditName, showAddItem, showDeleteConfirm, showUncheckAllConfirm, showParticipants, showPendingRequests, list.name, onBack]);
 
