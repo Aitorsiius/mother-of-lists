@@ -20,6 +20,7 @@ import {
   DialogFooter,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
+import { AnimatePresence } from "motion/react";
 
 interface ListViewProps {
   list: List;
@@ -52,10 +53,8 @@ export function ListView({
   const participantCount = 1 + list.sharedWith.length;
   const isOwner = list.ownerId === currentUserId;
 
-  // Manejar botón de atrás para cerrar diálogos
   useEffect(() => {
     const backButtonListener = CapacitorApp.addListener('backButton', () => {
-      // Cerrar diálogos en orden de prioridad
       if (showEditName) {
         setShowEditName(false);
         setEditedListName(list.name);
@@ -70,7 +69,6 @@ export function ListView({
       } else if (showPendingRequests) {
         setShowPendingRequests(false);
       } else {
-        // Si no hay diálogos abiertos, volver a la vista principal
         onBack();
       }
     });
@@ -84,7 +82,6 @@ export function ListView({
     const updatedItems = list.items.map((item) =>
       item.id === itemId ? { ...item, checked: !item.checked } : item
     );
-    
     onUpdateList({ ...list, items: updatedItems, updatedAt: new Date() });
   };
 
@@ -95,7 +92,6 @@ export function ListView({
       color,
       checked: false,
     };
-
     const updatedItems = [...list.items, newItem];
     onUpdateList({ ...list, items: updatedItems, updatedAt: new Date() });
   };
@@ -210,17 +206,20 @@ export function ListView({
             </div>
           ) : (
             <>
-              {sortedItems.map((item) => (
-                <ListItemComponent
-                  key={item.id}
-                  item={item}
-                  onToggle={handleToggleItem}
-                  onDelete={handleDeleteItem}
-                />
-              ))}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {sortedItems.map((item) => (
+                  <ListItemComponent
+                    key={item.id}
+                    item={item}
+                    onToggle={handleToggleItem}
+                    onDelete={handleDeleteItem}
+                  />
+                ))}
+              </AnimatePresence>
+              
               <Button
                 onClick={() => setShowAddItem(true)}
-                className="w-full"
+                className="w-full mt-4"
                 variant="outline"
               >
                 <Plus className="w-5 h-5 mr-2" />
@@ -231,7 +230,7 @@ export function ListView({
         </div>
       </div>
 
-      {/* Footer con código */}
+      {/* Footer con código - Se mantiene igual */}
       <div className="bg-white dark:bg-dark-surface border-t border-gray-200 dark:border-dark-border p-4 pb-6 fixed bottom-0 left-0 right-0 z-10" style={{ paddingBottom: 'max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom)))' }}>
         <div className="max-w-md mx-auto text-center relative">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t.listCode}</p>
@@ -251,7 +250,7 @@ export function ListView({
         </div>
       </div>
 
-      {/* Dialogs */}
+      {/* Dialogs - Se mantienen igual */}
       <AddItemDialog
         open={showAddItem}
         onOpenChange={setShowAddItem}
