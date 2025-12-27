@@ -133,7 +133,7 @@ export function ListView({
   };
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-dark-bg transition-colors flex flex-col overflow-hidden">
+    <div className="h-full bg-gray-50 dark:bg-dark-bg transition-colors flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-dark-border p-4 flex-shrink-0" style={{ paddingTop: 'max(2rem, env(safe-area-inset-top))' }}>
         <div className="flex items-center justify-between max-w-md mx-auto">
@@ -198,7 +198,7 @@ export function ListView({
       </div>
 
       {/* Items List */}
-      <div className="flex-1 overflow-y-auto p-4 pb-32 max-w-md mx-auto w-full">
+      <div className="flex-1 overflow-y-auto p-4 pb-48 max-w-md mx-auto w-full">
         <div className="space-y-3">
           {sortedItems.length === 0 ? (
             <div className="text-center py-12">
