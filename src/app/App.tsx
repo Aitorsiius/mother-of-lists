@@ -272,14 +272,22 @@ function App() {
       setLists(lists.map((list) => 
         list.id === updatedList.id ? updatedList : list
       ));
-      
-      // Siempre actualizar en Firebase si está configurado
-      if (firestoreService.isConfigured()) {
+
+      const isShared = updatedList.sharedWith.length > 0;
+      const isNameChange = lists.find(l => l.id === updatedList.id)?.name !== updatedList.name;
+
+      // Si la lista es compartida, subir todo a Firebase
+      if (firestoreService.isConfigured() && isShared) {
         await firestoreService.updateList(updatedList.id, updatedList);
+      } else if (firestoreService.isConfigured() && isNameChange) {
+        // Si solo cambia el nombre, subir solo el nombre y updatedAt
+        await firestoreService.updateList(updatedList.id, {
+          name: updatedList.name,
+          updatedAt: updatedList.updatedAt
+        });
       }
 
-      // Si es lista personal, TAMBIÉN actualizar localmente
-      const isShared = updatedList.sharedWith.length > 0;
+      // Si es lista personal, siempre actualizar localmente
       if (!isShared) {
         await localStorageService.updatePersonalListLocally(updatedList);
       }
