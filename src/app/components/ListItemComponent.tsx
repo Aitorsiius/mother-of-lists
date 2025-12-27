@@ -35,7 +35,7 @@ export const ListItemComponent = React.forwardRef<HTMLDivElement, ListItemCompon
           opacity: { duration: 0.2 },
           scale: { duration: 0.2 }
         }}
-        className="flex items-start gap-3 p-4 rounded-xl border-2 shadow-md hover:shadow-lg transition-shadow transform"
+        className="flex items-center gap-3 p-4 rounded-xl border-2 shadow-md hover:shadow-lg transition-shadow transform"
         style={{ 
           backgroundColor: item.color || '#f0f9ff',
           borderColor: item.color ? `color-mix(in srgb, ${item.color} 70%, #000 30%)` : '#bae6fd',
@@ -46,7 +46,7 @@ export const ListItemComponent = React.forwardRef<HTMLDivElement, ListItemCompon
           id={item.id}
           checked={item.checked}
           onCheckedChange={() => onToggle(item.id)}
-          className="flex-shrink-0 mt-0.5"
+          className="flex-shrink-0"
         />
         <label
           htmlFor={item.id}
