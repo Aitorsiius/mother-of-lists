@@ -35,7 +35,7 @@ Es mi primera incursión en el ecosistema de **Firebase**, diseñada con un obje
 
 Si no quieres complicarte con el código y solo quieres probar la app en tu Android, puedes descargar la última versión estable directamente desde este repositorio:
 
-📦 **[Descargar molv1.0.apk](./apk/molv1.0.apk)** *(O búscala en la sección de **Releases** de este GitHub)*
+📦 **[Descargar molv1.0.apk](https://github.com/Aitorsiius/mother-of-lists/releases/tag/v1.0)** *(O búscala en la sección de **Releases** de este GitHub)*
 
 ---
 
