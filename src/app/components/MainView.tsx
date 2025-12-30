@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { App as CapacitorApp } from '@capacitor/app';
 import { List, User } from "../../types";
+import { checkUsernameExists } from "../../services/firestore"; 
 import { AddListCodeDialog } from "./AddListCodeDialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Plus, Key, Users, Moon, Sun, Languages, Heart, Settings } from "lucide-react";
+import { Plus, Key, Users, Moon, Sun, Languages, Heart, Settings, Loader2 } from "lucide-react";
 import { Browser } from "@capacitor/browser";
 import {
   Dialog,
@@ -55,11 +56,14 @@ export function MainView({
   const [showSettings, setShowSettings] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [editedUserName, setEditedUserName] = useState(user.name);
-  
+  const [isCheckingName, setIsCheckingName] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!user.nameSet) {
       setShowEditUser(true);
       setEditedUserName(""); 
+      setNameError(null);
     }
   }, [user.nameSet]);
 
@@ -73,12 +77,12 @@ export function MainView({
   // Manejar botón de atrás para cerrar diálogos
   useEffect(() => {
     const backButtonListener = CapacitorApp.addListener('backButton', () => {
-      // Cerrar diálogos en orden de prioridad
       if (showSettings) {
         setShowSettings(false);
       } else if (showEditUser) {
         if (user.nameSet) {
           setShowEditUser(false);
+          setNameError(null);
         }
       } else if (showCreateList) {
         setShowCreateList(false);
@@ -86,7 +90,6 @@ export function MainView({
         setShowAddCode(false);
         if (onClearPendingCode) onClearPendingCode();
       }
-      // Si no hay diálogos abiertos, el listener de App.tsx manejará la navegación
     });
 
     return () => {
@@ -111,9 +114,33 @@ export function MainView({
     }
   };
 
-  const handleUpdateUserName = () => {
-    if (editedUserName.trim()) {
-      onUpdateUserName(editedUserName.trim());
+  const handleUpdateUserName = async () => {
+    const nameToSave = editedUserName.trim();
+    if (!nameToSave) return;
+
+    if (nameToSave === user.name && user.nameSet) {
+      setShowEditUser(false);
+      return;
+    }
+
+    setIsCheckingName(true);
+    setNameError(null);
+
+    try {
+      const exists = await checkUsernameExists(nameToSave);
+
+      if (exists) {
+        setNameError(t.nameTaken);
+        setIsCheckingName(false);
+      } else {
+        onUpdateUserName(nameToSave);
+        setShowEditUser(false);
+        setIsCheckingName(false);
+      }
+    } catch (error) {
+      console.error(error);
+      setIsCheckingName(false);
+      onUpdateUserName(nameToSave);
       setShowEditUser(false);
     }
   };
@@ -304,6 +331,7 @@ export function MainView({
               if (!user.nameSet) {
                 setEditedUserName(user.name);
                 setShowEditUser(true);
+                setNameError(null);
               }
             }}
             className={`w-full text-center p-2 rounded-lg transition-colors ${
@@ -379,6 +407,7 @@ export function MainView({
         onOpenChange={(open) => {
           if (!open && !user.nameSet) return;
           setShowEditUser(open);
+          if (!open) setNameError(null);
         }}
       >
         <DialogContent 
@@ -399,23 +428,49 @@ export function MainView({
                 id="user-name"
                 placeholder={t.namePlaceholder}
                 value={editedUserName}
-                onChange={(e) => setEditedUserName(e.target.value)}
+                onChange={(e) => {
+                  setEditedUserName(e.target.value);
+                  if (nameError) setNameError(null);
+                }}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === "Enter" && !isCheckingName) {
                     handleUpdateUserName();
                   }
                 }}
+                disabled={isCheckingName}
               />
+              {/* Mensaje de error si el nombre está cogido */}
+              {nameError && (
+                <p className="text-sm text-red-500 font-medium animate-in fade-in slide-in-from-top-1">
+                  {nameError}
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>
             {user.nameSet && (
-              <Button variant="outline" onClick={() => setShowEditUser(false)} className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowEditUser(false)} 
+                disabled={isCheckingName}
+                className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm"
+              >
                 {t.cancel}
               </Button>
             )}
-            <Button onClick={handleUpdateUserName} disabled={!editedUserName.trim()} className="bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 dark:border-blue-500 shadow-sm">
-              {t.setName}
+            <Button 
+              onClick={handleUpdateUserName} 
+              disabled={!editedUserName.trim() || isCheckingName} 
+              className="bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 dark:border-blue-500 shadow-sm min-w-[100px]"
+            >
+              {isCheckingName ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ...
+                </>
+              ) : (
+                t.setName
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

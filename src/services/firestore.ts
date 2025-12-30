@@ -466,5 +466,33 @@ export const getNextListCode = async (): Promise<string> => {
   }
 };
 
+/**
+ * Comprobar si un nombre de usuario ya existe (Case Insensitive)
+ * Compara "Pedro", "pedro" y "PEDRO" como iguales.
+ */
+export const checkUsernameExists = async (name: string): Promise<boolean> => {
+  try {
+    if (!isConfigured()) {
+      return false;
+    }
+
+    const usersRef = collection(db, "users");
+    
+    const querySnapshot = await getDocs(usersRef);
+    
+    const nameToCheck = name.trim().toLowerCase();
+
+    const exists = querySnapshot.docs.some(doc => {
+      const storedName = doc.data().name;
+      return storedName && storedName.toLowerCase() === nameToCheck;
+    });
+    
+    return exists;
+  } catch (error) {
+    console.error("Error comprobando nombre de usuario:", error);
+    return false;
+  }
+};
+
 // Exportar isConfigured para compatibilidad con el código existente
 export { isConfigured };

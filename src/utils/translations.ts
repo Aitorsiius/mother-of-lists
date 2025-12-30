@@ -42,6 +42,7 @@ export const translations = {
     name: "Nombre de usuario",
     namePlaceholder: "Tu nombre de usuario",
     setName: "Establecer nombre",
+    nameTaken: "Este nombre de usuario ya está en uso",
     
     addNewItem: "Agregar nuevo elemento",
     itemName: "Nombre del elemento",
@@ -144,6 +145,7 @@ export const translations = {
     name: "Username",
     namePlaceholder: "Your username",
     setName: "Set username",
+    nameTaken: "This username is already taken",
     
     addNewItem: "Add new item",
     itemName: "Item name",
