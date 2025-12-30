@@ -6,13 +6,13 @@ import { ListItemComponent } from "./ListItemComponent";
 import { AddItemDialog } from "./AddItemDialog";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
 import { ConfirmUncheckDialog } from "./ConfirmUncheckDialog";
+import { ConfirmLeaveDialog } from "./ConfirmLeaveDialog"; 
 import { ParticipantsDialog } from "./ParticipantsDialog";
 import { PendingRequestsDialog } from "./PendingRequestsDialog";
 import { Button } from "./ui/button";
 import { ArrowLeft, Trash2, Plus, Users, CheckCheck, UserPlus, Share2, Edit2, LogOut } from "lucide-react";
 import { sortItems } from "../../utils/sortItems";
 import { Share } from '@capacitor/share';
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -49,13 +49,14 @@ export function ListView({
   const [showPendingRequests, setShowPendingRequests] = useState(false);
   const [showEditName, setShowEditName] = useState(false);
   const [editedListName, setEditedListName] = useState(list.name);
+  
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   const sortedItems = sortItems(list.items);
   const participantCount = 1 + list.sharedWith.length;
   const isOwner = list.ownerId === currentUserId;
   const isGuest = !isOwner && list.sharedWith.includes(currentUserId);
-  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
-  
+
   const handleLeaveList = async () => {
     try {
       await removeUserFromList(list.id, currentUserId);
@@ -80,6 +81,8 @@ export function ListView({
         setShowParticipants(false);
       } else if (showPendingRequests) {
         setShowPendingRequests(false);
+      } else if (showLeaveConfirm) {
+        setShowLeaveConfirm(false);
       } else {
         onBack();
       }
@@ -88,7 +91,7 @@ export function ListView({
     return () => {
       backButtonListener.then(listener => listener.remove());
     };
-  }, [showEditName, showAddItem, showDeleteConfirm, showUncheckAllConfirm, showParticipants, showPendingRequests, list.name, onBack]);
+  }, [showEditName, showAddItem, showDeleteConfirm, showUncheckAllConfirm, showParticipants, showPendingRequests, showLeaveConfirm, list.name, onBack]);
 
   const handleToggleItem = (itemId: string) => {
     const updatedItems = list.items.map((item) =>
@@ -194,7 +197,7 @@ export function ListView({
               </button>
             )}
             
-            {/* Botones de acción (Eliminar/Salir) */}
+            {/* Botones de acción */}
             {isOwner ? (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -212,28 +215,6 @@ export function ListView({
                 <LogOut className="w-6 h-6" />
               </button>
             ) : null}
-
-            {/* Diálogo Confirmar salir de la lista */}
-            <Dialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>{t.leaveListTitle}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <p className="text-lg dark:text-white">
-                    {t.leaveListDesc.replace('{name}', list.name)}
-                  </p>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setShowLeaveConfirm(false)}>
-                    {t.cancel}
-                  </Button>
-                  <Button onClick={handleLeaveList} className="bg-red-600 hover:bg-red-700 text-white">
-                    {t.leave}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
       </div>
@@ -294,7 +275,7 @@ export function ListView({
         </div>
       </div>
 
-      {/* Dialogs - Se mantienen igual */}
+      {/* Dialogs */}
       <AddItemDialog
         open={showAddItem}
         onOpenChange={setShowAddItem}
@@ -306,6 +287,14 @@ export function ListView({
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
         onConfirm={handleDeleteList}
+        listName={list.name}
+        translations={t}
+      />
+
+      <ConfirmLeaveDialog
+        open={showLeaveConfirm}
+        onOpenChange={setShowLeaveConfirm}
+        onConfirm={handleLeaveList}
         listName={list.name}
         translations={t}
       />
