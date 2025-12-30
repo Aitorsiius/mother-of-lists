@@ -7,13 +7,15 @@
  * la Licencia, o (a tu elección) cualquier versión posterior.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SplashScreen as CapacitorSplashScreen } from '@capacitor/splash-screen';
 import { App as CapacitorApp } from '@capacitor/app';
+import { Network } from '@capacitor/network';
 import { List, User } from "../types";
 import { MainView } from "./components/MainView";
 import { ListView } from "./components/ListView";
 import { SplashScreen } from "./components/SplashScreen";
+import { NoInternetConnection } from "./components/NoInternetConnection";
 import { generateListCode } from "../utils/sortItems";
 import { toast, Toaster } from "sonner";
 import * as firestoreService from "../services/firestore";
@@ -26,6 +28,8 @@ import { useTranslation } from "../utils/translations";
 function App() {
   // Estado del usuario actual
   const [user, setUser] = useState<User | null>(null);
+  
+  const userLoadedRef = useRef(false);
 
   // Estado de las listas
   const [lists, setLists] = useState<List[]>([]);
@@ -40,75 +44,76 @@ function App() {
   const { language, toggleLanguage } = useLanguage();
   const t = useTranslation(language);
 
-  // Inicializar usuario al cargar la app
-  useEffect(() => {
-    const initUser = async () => {
-      try {
-        // Autenticar usuario (existente o nuevo)
-        const firebaseUser = await authService.verificarUsuario();
-        
-        // Intentar cargar usuario desde Firestore
-        let userData = await firestoreService.getUser(firebaseUser.uid);
-        
-        if (userData) {
-          // Usuario existente en Firestore
-          setUser(userData);
-        } else {
-          // Usuario nuevo, crear en Firestore
-          const nombreGuardado = await authService.obtenerNombreLocal();
-          const newUser: User = {
-            id: firebaseUser.uid,
-            name: nombreGuardado || "Usuario",
-            nameSet: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          };
-          
-          await firestoreService.saveUser(newUser);
-          setUser(newUser);
-        }
-      } catch (error) {
-        toast.error(t.errorInitApp);
-        // Fallback a usuario temporal
-        setUser({
-          id: crypto.randomUUID(),
-          name: "Usuario",
+  // Función de inicialización de usuario extraída para poder reutilizarla
+  const initUser = async () => {
+    const status = await Network.getStatus();
+    if (!status.connected) {
+      // Si no hay red, no intentamos nada. 
+      // El componente <NoInternetConnection /> se encargará de avisar.
+      // Nos quedamos en isLoading = true
+      return;
+    }
+
+    try {
+      // Autenticar usuario (existente o nuevo)
+      const firebaseUser = await authService.verificarUsuario();
+      
+      // Intentar cargar usuario desde Firestore
+      let userData = await firestoreService.getUser(firebaseUser.uid);
+      
+      if (userData) {
+        // Usuario existente en Firestore
+        setUser(userData);
+        userLoadedRef.current = true;
+      } else {
+        // Usuario nuevo, crear en Firestore
+        const nombreGuardado = await authService.obtenerNombreLocal();
+        const newUser: User = {
+          id: firebaseUser.uid,
+          name: nombreGuardado || "Usuario",
           nameSet: false,
           createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        };
+        
+        await firestoreService.saveUser(newUser);
+        setUser(newUser);
+        userLoadedRef.current = true;
       }
+    } catch (error) {
+      console.error("Error inicializando usuario:", error);
+      toast.error(t.errorInitApp);
+    }
+  };
+
+  // Inicializar usuario al cargar la app y configurar listener de red
+  useEffect(() => {
+    // Intentar inicializar al montar
+    initUser();
+
+    // Configurar listener para reintentar cuando vuelva la conexión
+    const setupNetworkListener = async () => {
+      const listener = await Network.addListener('networkStatusChange', async (status) => {
+        // Si recuperamos conexión Y el usuario aún no se ha cargado
+        if (status.connected && !userLoadedRef.current) {
+          console.log("Conexión recuperada, reintentando cargar usuario...");
+          await initUser();
+        }
+      });
+
+      return listener;
     };
 
-    initUser();
+    const listenerPromise = setupNetworkListener();
+
+    return () => {
+      listenerPromise.then(listener => listener.remove());
+    };
   }, []);
 
   // Cargar datos de las listas cuando el usuario esté listo
   useEffect(() => {
     if (!user) return;
-
-    // Verificar si Firebase está configurado
-    if (!firestoreService.isConfigured()) {
-      // Datos de ejemplo para desarrollo
-      const sampleList: List = {
-        id: crypto.randomUUID(),
-        name: "Lista de ejemplo",
-        code: "1234",
-        ownerId: user.id,
-        sharedWith: [],
-        pendingRequests: [],
-        items: [
-          { id: "1", text: "Leche", checked: false },
-          { id: "2", text: "Pan", checked: false },
-          { id: "3", text: "Huevos", color: "#ffebee", checked: false },
-        ],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setLists([sampleList]);
-      setIsLoading(false);
-      return;
-    }
 
     // Cargar listas personales desde almacenamiento local
     const loadData = async () => {
@@ -392,15 +397,10 @@ function App() {
   }, []);
 
   // Manejar el botón/gesto de atrás en dispositivos móviles
-  // ListView maneja completamente su propio botón de atrás (diálogos + navegación)
-  // Este listener solo se ejecuta en MainView
   useEffect(() => {
     const backButtonListener = CapacitorApp.addListener('backButton', () => {
-      // Solo manejar en MainView (cuando no hay lista seleccionada)
-      // ListView maneja su propio comportamiento de atrás
       if (!selectedListId) {
         // En MainView sin diálogos, la app podría cerrarse o no hacer nada
-        // Los diálogos de MainView son manejados por su propio listener
       }
     });
 
@@ -409,14 +409,13 @@ function App() {
     };
   }, [selectedListId]);
 
-  // Mostrar splash screen personalizada mientras carga
-  if (isLoading || !user) {
-    return <SplashScreen />;
-  }
-
   return (
     <>
-      {selectedList ? (
+      {/* Componente global de Sin Internet */}
+      <NoInternetConnection translations={t} />
+      {(isLoading || !user) ? (
+        <SplashScreen />
+      ) : selectedList ? (
         <ListView
           list={selectedList}
           currentUserId={user.id}

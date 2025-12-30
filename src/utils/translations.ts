@@ -2,6 +2,11 @@ export type Language = "es" | "en";
 
 export const translations = {
   es: {
+    // No Internet
+    noInternetTitle: "Sin conexión a Internet",
+    noInternetDesc: "Parece que has perdido la conexión. La aplicación se pausará hasta que recuperes la señal para evitar pérdida de datos.",
+    waitingConnection: "Esperando conexión...",
+
     // MainView
     myLists: "Mis Listas",
     darkMode: "Modo oscuro",
@@ -105,6 +110,11 @@ export const translations = {
     errorSetName: "Error al establecer el nombre",
   },
   en: {
+    // No Internet
+    noInternetTitle: "No Internet Connection",
+    noInternetDesc: "It seems you lost your connection. The app will pause until signal is restored to prevent data loss.",
+    waitingConnection: "Waiting for connection...",
+    
     // MainView
     myLists: "My Lists",
     darkMode: "Dark mode",
