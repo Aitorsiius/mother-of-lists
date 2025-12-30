@@ -55,6 +55,13 @@ export function MainView({
   const [showSettings, setShowSettings] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [editedUserName, setEditedUserName] = useState(user.name);
+  
+  useEffect(() => {
+    if (!user.nameSet) {
+      setShowEditUser(true);
+      setEditedUserName(""); 
+    }
+  }, [user.nameSet]);
 
   // Abrir diálogo si hay código pendiente
   useEffect(() => {
@@ -70,7 +77,9 @@ export function MainView({
       if (showSettings) {
         setShowSettings(false);
       } else if (showEditUser) {
-        setShowEditUser(false);
+        if (user.nameSet) {
+          setShowEditUser(false);
+        }
       } else if (showCreateList) {
         setShowCreateList(false);
       } else if (showAddCode) {
@@ -83,7 +92,7 @@ export function MainView({
     return () => {
       backButtonListener.then(listener => listener.remove());
     };
-  }, [showSettings, showEditUser, showCreateList, showAddCode, onClearPendingCode]);
+  }, [showSettings, showEditUser, showCreateList, showAddCode, onClearPendingCode, user.nameSet]);
 
   const sortedLists = [...lists].sort((a, b) => {
     const dateA = a.updatedAt instanceof Date ? a.updatedAt : new Date(a.updatedAt);
@@ -365,8 +374,18 @@ export function MainView({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showEditUser} onOpenChange={setShowEditUser}>
-        <DialogContent className="max-w-sm dark:bg-dark-surface dark:border-dark-border">
+      <Dialog 
+        open={showEditUser} 
+        onOpenChange={(open) => {
+          if (!open && !user.nameSet) return;
+          setShowEditUser(open);
+        }}
+      >
+        <DialogContent 
+          className={`max-w-sm dark:bg-dark-surface dark:border-dark-border ${!user.nameSet ? "[&>button]:hidden" : ""}`}
+          onInteractOutside={(e) => !user.nameSet && e.preventDefault()}
+          onEscapeKeyDown={(e) => !user.nameSet && e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle className="dark:text-white">{t.setUsername}</DialogTitle>
             <DialogDescription className="dark:text-gray-300">
@@ -390,9 +409,11 @@ export function MainView({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditUser(false)} className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm">
-              {t.cancel}
-            </Button>
+            {user.nameSet && (
+              <Button variant="outline" onClick={() => setShowEditUser(false)} className="border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-sm">
+                {t.cancel}
+              </Button>
+            )}
             <Button onClick={handleUpdateUserName} disabled={!editedUserName.trim()} className="bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 dark:border-blue-500 shadow-sm">
               {t.setName}
             </Button>

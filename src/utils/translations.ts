@@ -39,8 +39,8 @@ export const translations = {
     
     setUsername: "Establecer nombre de usuario",
     setUsernameDesc: "Este será tu nombre permanente y no podrás cambiarlo después",
-    name: "Nombre",
-    namePlaceholder: "Tu nombre",
+    name: "Nombre de usuario",
+    namePlaceholder: "Tu nombre de usuario",
     setName: "Establecer nombre",
     
     addNewItem: "Agregar nuevo elemento",
@@ -141,9 +141,9 @@ export const translations = {
     
     setUsername: "Set username",
     setUsernameDesc: "This will be your permanent name and you won't be able to change it later",
-    name: "Name",
-    namePlaceholder: "Your name",
-    setName: "Set name",
+    name: "Username",
+    namePlaceholder: "Your username",
+    setName: "Set username",
     
     addNewItem: "Add new item",
     itemName: "Item name",
