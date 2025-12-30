@@ -21,6 +21,7 @@ export const translations = {
     pendingRequests: "Solicitudes Pendientes",
     uncheckAll: "Desmarcar todos",
     deleteList: "Eliminar lista",
+    leaveList: "Salir de la lista",
     back: "Volver",
     addItem: "Agregar elemento",
     emptyList: "No hay elementos en esta lista todavía",
@@ -65,6 +66,10 @@ export const translations = {
     deleteListTitle: "¿Eliminar lista?",
     deleteListDesc: "¿Estás seguro de que quieres eliminar la lista \"{name}\"? Esta acción no se puede deshacer y todos los usuarios perderán acceso a ella.",
     delete: "Eliminar",
+
+    leaveListTitle: "¿Salir de la lista?",
+    leaveListDesc: "¿Seguro que quieres salir de la lista \"{name}\"?",
+    leave: "Salir",
     
     uncheckAllTitle: "¿Desmarcar todos los elementos?",
     uncheckAllDesc: "Todos los elementos marcados de la lista volverán a estar sin marcar.",
@@ -118,6 +123,7 @@ export const translations = {
     pendingRequests: "Pending Requests",
     uncheckAll: "Uncheck all",
     deleteList: "Delete list",
+    leaveList: "Leave list",
     back: "Back",
     addItem: "Add item",
     emptyList: "There are no items in this list yet",
@@ -162,6 +168,10 @@ export const translations = {
     deleteListTitle: "Delete list?",
     deleteListDesc: "Are you sure you want to delete the list \"{name}\"? This action cannot be undone and all users will lose access to it.",
     delete: "Delete",
+
+    leaveListTitle: "Leave list?",
+    leaveListDesc: "Are you sure you want to leave the list \"{name}\"?",
+    leave: "Leave",
     
     uncheckAllTitle: "Uncheck all items?",
     uncheckAllDesc: "All checked items in the list will be unchecked.",

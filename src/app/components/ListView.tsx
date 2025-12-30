@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { removeUserFromList } from "../../services/firestore";
 import { App as CapacitorApp } from '@capacitor/app';
 import { List, ListItem } from "../../types";
 import { ListItemComponent } from "./ListItemComponent";
@@ -8,7 +9,7 @@ import { ConfirmUncheckDialog } from "./ConfirmUncheckDialog";
 import { ParticipantsDialog } from "./ParticipantsDialog";
 import { PendingRequestsDialog } from "./PendingRequestsDialog";
 import { Button } from "./ui/button";
-import { ArrowLeft, Trash2, Plus, Users, CheckCheck, UserPlus, Share2, Edit2 } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Users, CheckCheck, UserPlus, Share2, Edit2, LogOut } from "lucide-react";
 import { sortItems } from "../../utils/sortItems";
 import { Share } from '@capacitor/share';
 import { toast } from "sonner";
@@ -52,6 +53,17 @@ export function ListView({
   const sortedItems = sortItems(list.items);
   const participantCount = 1 + list.sharedWith.length;
   const isOwner = list.ownerId === currentUserId;
+  const isGuest = !isOwner && list.sharedWith.includes(currentUserId);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  
+  const handleLeaveList = async () => {
+    try {
+      await removeUserFromList(list.id, currentUserId);
+      onBack();
+    } catch (error) {
+       console.error(error);
+    }
+  };
 
   useEffect(() => {
     const backButtonListener = CapacitorApp.addListener('backButton', () => {
@@ -181,14 +193,47 @@ export function ListView({
                 <CheckCheck className="w-6 h-6" />
               </button>
             )}
-            {isOwner && (
+            
+            {/* Botones de acción (Eliminar/Salir) */}
+            {isOwner ? (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className="p-2 bg-white dark:bg-dark-surface border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors text-red-600 dark:text-red-400 shadow-sm"
+                title={t.deleteList}
               >
                 <Trash2 className="w-6 h-6" />
               </button>
-            )}
+            ) : isGuest ? (
+              <button
+                onClick={() => setShowLeaveConfirm(true)}
+                className="p-2 bg-white dark:bg-dark-surface border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors text-red-600 dark:text-red-400 shadow-sm"
+                title={t.leaveList}
+              >
+                <LogOut className="w-6 h-6" />
+              </button>
+            ) : null}
+
+            {/* Diálogo Confirmar salir de la lista */}
+            <Dialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>{t.leaveListTitle}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <p className="text-lg dark:text-white">
+                    {t.leaveListDesc.replace('{name}', list.name)}
+                  </p>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowLeaveConfirm(false)}>
+                    {t.cancel}
+                  </Button>
+                  <Button onClick={handleLeaveList} className="bg-red-600 hover:bg-red-700 text-white">
+                    {t.leave}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
@@ -239,7 +284,6 @@ export function ListView({
             <button
               onClick={handleShare}
               className="absolute right-0 top-1/2 -translate-y-1/2 p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
-              title={t.shareList}
             >
               <Share2 className="w-5 h-5" />
             </button>
